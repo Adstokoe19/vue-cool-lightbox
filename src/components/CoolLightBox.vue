@@ -111,13 +111,15 @@
         <!--/cool-lightbox__wrapper-->
 
         <transition name="modal">
-          <div v-show="isObject && (items[imgIndex].title || items[imgIndex].description)" key="caption-block" class="cool-lightbox-caption">
-            <transition name="cool-lightbox-slide-change" mode="out-in">
-              <h6 key="title" v-if="isObject && items[imgIndex].title">{{ items[imgIndex].title }}</h6>
-            </transition>
-
+          <div v-show="isObject && (items[imgIndex].title || items[imgIndex].description || items[imgIndex].link)" key="caption-block" class="cool-lightbox-caption">
             <transition name="cool-lightbox-slide-change" mode="out-in">
               <p key="description" v-if="isObject && items[imgIndex].description">{{ items[imgIndex].description }}</p>
+            </transition>
+            <transition name="cool-lightbox-slide-change" mode="out-in">
+              <p key="title" v-if="isObject && items[imgIndex].title">{{ items[imgIndex].title }}</p>
+            </transition>
+            <transition name="cool-lightbox-slide-change" mode="out-in">
+              <a key="link" :href="items[imgIndex].link" target="_blank" v-if="isObject && items[imgIndex].link">{{ items[imgIndex].linkText }}</a>
             </transition>
           </div>
           <!--/cool-lightbox-caption-->
@@ -720,7 +722,7 @@ export default {
         return false;
       }
 
-      var elements = '.cool-lightbox-thumbs, .cool-lightbox-thumbs *, .cool-lightbox-button, .cool-lightbox-toolbar__btn, .cool-lightbox-toolbar__btn *, .cool-lightbox-button *, .cool-lightbox__slide__img *, .cool-lightbox-video';
+      var elements = '.cool-lightbox-thumbs, .cool-lightbox-thumbs *, .cool-lightbox-button, .cool-lightbox-toolbar__btn, .cool-lightbox-toolbar__btn *, .cool-lightbox-button *, .cool-lightbox__slide__img *, .cool-lightbox-video, .cool-lightbox-link';
       if (!event.target.matches(elements)) {
         this.close()
       }
@@ -763,7 +765,7 @@ export default {
 
     // caption size 
     addCaptionPadding() {
-      if(this.isObject && (this.items[this.imgIndex].title || this.items[this.imgIndex].descripcion)) {
+      if(this.isObject && (this.items[this.imgIndex].title || this.items[this.imgIndex].description)) {
         const el = document.getElementsByClassName('cool-lightbox-caption');
         if(el.length > 0) {
           this.paddingBottom = el[0].offsetHeight
@@ -1358,14 +1360,9 @@ $breakpoints: (
 
 .cool-lightbox-caption {
   bottom: 0;
-  color: #eee;
-  font-size: 14px;
-  font-weight: 400;
   left: 0;
   opacity: 1;
-  line-height: 1.5;
   padding: 18px 28px 16px 24px;
-  pointer-events: none;
   right: 0;
   text-align: center;
   z-index: 99996;
@@ -1377,22 +1374,8 @@ $breakpoints: (
   @include breakpoint(phone) {
     padding: 22px 30px 23px 30px;
   }
-  h6 {
-    font-size: 14px;
-    margin: 0 0 6px 0;
-    line-height: 130%;
-    @include breakpoint(phone) {
-      font-size: 16px;
-      margin: 0 0 6px 0;
-    }
-  }
-  p {
-    font-size: 13px;
-    line-height: 130%;
-    color: #ccc;
-    @include breakpoint(phone) {
-      font-size: 15px;
-    }
+  > p, a {
+    color: #fff;
   }
 }
 
