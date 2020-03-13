@@ -61,17 +61,35 @@
             <transition name="cool-lightbox-slide-change" mode="out-in">
               <div v-if="!videoUrl" key="image" :style="imgWrapperStyle" class="cool-lightbox__slide__img">
                 <transition name="cool-lightbox-slide-change" mode="out-in">
-                <img 
-                  :src="itemSrc" 
-                  :key="imgIndex"
-                  draggable="false"
-                  
-                  @click="zoomImage"
-                  @load="imageLoaded"
-                  @mousedown="handleMouseDown($event)"
-                  @mouseup="handleMouseUp($event)"
-                  @mousemove="handleMouseMove($event)"
-                  />
+                  <div class="position-relative">
+                    <div key="caption" v-if="isObject && items[imgIndex].caption" class="position-absolute media-image-credit py-2 px-4"><small>Credit: {{ items[imgIndex].caption }}</small></div>
+                    <img
+                      :src="itemSrc" 
+                      :key="imgIndex"
+                      draggable="false"
+                      
+                      @click="zoomImage"
+                      @load="imageLoaded"
+                      @mousedown="handleMouseDown($event)"
+                      @mouseup="handleMouseUp($event)"
+                      @mousemove="handleMouseMove($event)"
+                      />
+                  </div>
+                </transition>
+
+                <transition name="cool-lightbox-slide-change" mode="out-in">
+                  <div v-show="isObject && (items[imgIndex].caption || items[imgIndex].description || items[imgIndex].link)" key="caption-block" class="container mx-auto mt-md-gw">
+                    <div class="row justify-content-center">
+                      <div class="col-12 col-lg-10 offset-lg-1">
+                        <div class="d-flex flex-column flex-md-row justify-content-between bg-stone-blue text-white p-4">
+                          <p key="description" v-if="isObject && items[imgIndex].description" class="mb-0 font-size-14">{{ items[imgIndex].description }}</p>
+                          <div class="d-flex justify-content-end justify-content-md-start align-items-center flex-shrink-0 border-top border-md-top-0 border-md-left border-white pt-3 mt-3 pt-md-0 mt-md-0 pl-0 ml-0 pl-md-4 ml-md-4">
+                            <a key="link" :href="items[imgIndex].link" target="_blank" v-if="isObject && items[imgIndex].link">{{ items[imgIndex].linkText }}</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </transition>
                 
                 <div v-show="imageLoading" class="cool-lightbox-loading-wrapper">
@@ -110,21 +128,19 @@
         </div>
         <!--/cool-lightbox__wrapper-->
 
-        <transition name="modal">
-          <div v-show="isObject && (items[imgIndex].title || items[imgIndex].description || items[imgIndex].link)" key="caption-block" class="cool-lightbox-caption">
+        <!-- <transition name="modal">
+          <div v-show="isObject && (items[imgIndex].title || items[imgIndex].description)" key="caption-block" class="cool-lightbox-caption">
+            <transition name="cool-lightbox-slide-change" mode="out-in">
+              <h6 key="title" v-if="isObject && items[imgIndex].title">{{ items[imgIndex].title }}</h6>
+            </transition>
+
             <transition name="cool-lightbox-slide-change" mode="out-in">
               <p key="description" v-if="isObject && items[imgIndex].description">{{ items[imgIndex].description }}</p>
             </transition>
-            <transition name="cool-lightbox-slide-change" mode="out-in">
-              <p key="title" v-if="isObject && items[imgIndex].title">{{ items[imgIndex].title }}</p>
-            </transition>
-            <transition name="cool-lightbox-slide-change" mode="out-in">
-              <a key="link" :href="items[imgIndex].link" target="_blank" v-if="isObject && items[imgIndex].link">{{ items[imgIndex].linkText }}</a>
-            </transition>
           </div>
-          <!--/cool-lightbox-caption-->
-        </transition>
-        
+        </transition> -->
+        <!--/cool-lightbox-caption-->
+
         <div class="cool-lightbox-toolbar" :class="buttonsClasses">
           <button type="button" v-if="this.slideshow && items.length > 1" class="cool-lightbox-toolbar__btn" @click="togglePlaySlideshow">
             <svg xmlns="http://www.w3.org/2000/svg" v-if="!isPlayingSlideShow" viewBox="0 0 24 24">
@@ -329,7 +345,7 @@ export default {
           }
 
           // add caption padding to Lightbox wrapper
-          this.addCaptionPadding()
+          // this.addCaptionPadding()
 
           // check if user can zoom
           this.checkZoom()
@@ -1293,7 +1309,7 @@ $breakpoints: (
     position: relative;
     .cool-lightbox__slide__img {
       position: absolute;
-      height: 100%;
+      /* height: 100%; */
       width: 100%;
       left: 50%;
       top: 50%;
@@ -1302,6 +1318,7 @@ $breakpoints: (
       transform: translate3d(-50%, -50%, 0px) scale3d(1, 1, 1);
       transition: all .3s ease;
       display: flex;
+      flex-direction: column;
     }
     img {
       max-width: 100%;
@@ -1310,6 +1327,13 @@ $breakpoints: (
       z-index: 9999;
       box-shadow: 0 0 1.5rem rgba(0,0,0,.45);
     }
+    > p, 
+      a, 
+      a:hover, 
+      a:active, 
+      a:focus {
+        color: #fff;  
+    } 
   }
 }
 
@@ -1360,9 +1384,14 @@ $breakpoints: (
 
 .cool-lightbox-caption {
   bottom: 0;
+  color: #eee;
+  font-size: 14px;
+  font-weight: 400;
   left: 0;
   opacity: 1;
+  line-height: 1.5;
   padding: 18px 28px 16px 24px;
+  pointer-events: none;
   right: 0;
   text-align: center;
   z-index: 99996;
@@ -1374,8 +1403,22 @@ $breakpoints: (
   @include breakpoint(phone) {
     padding: 22px 30px 23px 30px;
   }
-  > p, a {
-    color: #fff;
+  h6 {
+    font-size: 14px;
+    margin: 0 0 6px 0;
+    line-height: 130%;
+    @include breakpoint(phone) {
+      font-size: 16px;
+      margin: 0 0 6px 0;
+    }
+  }
+  p {
+    font-size: 13px;
+    line-height: 130%;
+    color: #ccc;
+    @include breakpoint(phone) {
+      font-size: 15px;
+    }
   }
 }
 
